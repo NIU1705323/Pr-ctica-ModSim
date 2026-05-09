@@ -36,36 +36,48 @@ def veins_propers(posicio: np.ndarray, mapa: np.ndarray) -> np.ndarray:
     return np.asarray(resultat)
 
 
-def satisfet(posicio: np.ndarray, mapa: np.ndarray) -> bool: # Com esta el Roger quan fa EDP's
+def satisfet(posicio: np.ndarray, mapa: np.ndarray, clase: np.ndarray = np.array(None)) -> float: # Com esta el Roger quan fa EDP's
     """Funció que ens diu si un inividu està còmode en la seva posició actual"""
 
     # Si és una casella buida, està satisfeta
-    tipus = mapa[tuple(posicio)]
-    if tipus == -1: return True 
+    if clase == None: tipus = mapa[tuple(posicio)] 
+    else: tipus = clase
+    if tipus == -1: return 1.0 
 
     # Si no té veins, també ho està
     veins = veins_propers(posicio, mapa)
     total = sum(veins)
-    if total == 0: return True
+    if total == 0: return 1.0
 
     # En cas contrari, depén del llindar
-    proporcio = veins[tipus] / total
-    return bool(proporcio >= TAU)
+    proporcio = float(veins[tipus] / total)
+    return proporcio
 
 
-def moure_agent(posicio: np.ndarray, mapa: np.ndarray) -> None:
+def moure_agent(posicio: np.ndarray, mapa: np.ndarray) -> bool:
     """Funció que desplaça a l'individu de la posició argument a una millor"""
+    
+    # Definim les variables que necessitem
+    tipus = mapa[tuple(posicio)]
+    if tipus == -1: return False # Per a evitar errors
+    nova_pos = None
+    bst_prop = satisfet(posicio, mapa, clase=tipus)
+    if bst_prop == 1.0: return False # Per a evitar errors
+    
     # Busquem caselles buides adjacents
-    buides = []
     for pos in INDEXOS_VEINS:
         vei = np.array(posicio) + np.array(pos)
         if index_valid(vei, mapa) and mapa[tuple(vei)] == -1:
-            buides.append(vei)
+            prop = satisfet(vei, mapa, clase=tipus) # Revisem si estaria satisfet
+            if prop == 1.0: # En cas afirmatiu, ens movem a aquella posició
+                nova_pos = vei
+                break
+            if prop > bst_prop: # En cas negatiu, guardem la millor
+                bst_prop = prop
+                nova_pos = vei
 
-    # Si no es pot moure, no cal fer canvis al mapa
-    if len(buides) == 0: return
-
-    # En cas contrari, intercanviem la seva posició a una casella buida
-    nova_pos = buides[np.random.randint(len(buides))] # nova posició aleatoria (el agent utilitza la porta mágica)
-    mapa[tuple(nova_pos)] = mapa[tuple(posicio)]
+    # Si no trobem cap casella on estaria satisfet, anem a una qualsevol
+    if nova_pos is None: return False
+    mapa[tuple(nova_pos)] = tipus
     mapa[tuple(posicio)] = -1
+    return True
