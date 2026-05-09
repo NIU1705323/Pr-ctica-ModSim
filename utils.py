@@ -1,81 +1,71 @@
-########## ÚTILS ##########
-#
-# Document amb les funcions programades
-#
+############################## ÚTILS ##############################
+##                                                               ##
+## Document amb les funcions programades                         ##
+##                                                               ##
+## Les funcions tenen com a arguments els seguents paràmetres:   ##
+##   mapa: mapa del veinat, l'espai on conviuen els veins        ##
+##   posicio: el/s index del veí sobre el que actua la funció    ##
+##                                                               ##
+###################################################################
 
 import numpy as np
 from config import *
 
-def index_valid(arr: np.ndarray, idx: int):
-    """
-    Funció que retorna les posicións vàlides 
+def index_valid(posicio: np.ndarray, mapa: np.ndarray):
+    """Funció que retorna les posicións vàlides"""
     
-    **Paràmetres**: 
-        posició : llista amb la posició de l'element en la matriu
-        array : mapa del veïnat
-        indexos_Caselles_Veines : posicions adjacents a considerar
-        ponderacio_caselles_veines : ponderació d'importància segons la distància
-        
-    **Retorna**:
-        array : vector d
-    """
-    idx = np.asarray(idx)
-
     return (
-        idx.ndim == 1 and
-        len(idx) == arr.ndim and
-        np.all(idx >= 0) and
-        np.all(idx < arr.shape)
+        posicio.ndim == 1 and
+        len(posicio) == mapa.ndim and
+        np.all(posicio >= 0) and
+        np.all(posicio < mapa.shape)
     )
     
-def veins_propers(posicio: list[int], 
-                   array: np.ndarray, 
-                   indexos_caselles_veines : list[list[int]], 
-                   ponderacio_caselles_veines : list[int]) -> np.ndarray:
-    """
-    Funció que retorna l'importància ponderada de cada color de veí
     
-    **Paràmetres**: 
-        posició : llista amb la posició de l'element en la matriu
-        array : mapa del veïnat
-        indexos_Caselles_Veines : posicions adjacents a considerar
-        ponderació_caselles_veines : ponderació d'importància segons la distància
-        
-    **Retorna**:
-        array : vector de mida TIPUS_DE_VEINS amb nombre de cada veí ponderat a distància
-    """
+def veins_propers(posicio: np.ndarray, mapa: np.ndarray) -> np.ndarray:
+    """Funció que retorna l'importància ponderada de cada color de veí"""
+    
     resultat=[0]*TIPUS_DE_VEINS
-    for i, pos in enumerate(indexos_caselles_veines):
+    for i, pos in enumerate(INDEXOS_VEINS):
         vei = np.array(posicio) + np.array(pos)
-        if index_valid(array, vei):
-            valor = array[tuple(vei)]
+        if index_valid(vei, mapa):
+            valor = mapa[tuple(vei)]
             if valor != -1:
-                resultat[valor] += ponderacio_caselles_veines[i]
+                resultat[valor] += PONDERACIONS[i]
+    
+    return np.asarray(resultat)
 
-    return resultat
 
+def satisfet(posicio: np.ndarray, mapa: np.ndarray) -> bool: # Com esta el Roger quan fa EDP's
+    """Funció que ens diu si un inividu està còmode en la seva posició actual"""
 
-def satisfet(posicio, arr, tau): # Com esta el Roger quan fa EDP's
-    tipus = arr[tuple(posicio)] # tipus d'agent
+    # Si és una casella buida, està satisfeta
+    tipus = mapa[tuple(posicio)]
+    if tipus == -1: return True 
 
-    if tipus == -1:
-        return True
-
-    veins = veins_propers(posicio, arr, INDEXOS_VEINS, PONDERACIONS)
+    # Si no té veins, també ho està
+    veins = veins_propers(posicio, mapa)
     total = sum(veins)
-    if total == 0:
-        return True
+    if total == 0: return True
 
+    # En cas contrari, depén del llindar
     proporcio = veins[tipus] / total
-    return proporcio >= tau
+    return bool(proporcio >= TAU)
 
 
-def moure_agent(posicio, arr):
-    buides = np.argwhere(arr == -1) # busquem caselles buides
+def moure_agent(posicio: np.ndarray, mapa: np.ndarray) -> None:
+    """Funció que desplaça a l'individu de la posició argument a una millor"""
+    # Busquem caselles buides adjacents
+    buides = []
+    for pos in INDEXOS_VEINS:
+        vei = np.array(posicio) + np.array(pos)
+        if index_valid(vei, mapa) and mapa[tuple(vei)] == -1:
+            buides.append(vei)
 
-    if len(buides) == 0:
-        return
+    # Si no es pot moure, no cal fer canvis al mapa
+    if len(buides) == 0: return
 
+    # En cas contrari, intercanviem la seva posició a una casella buida
     nova_pos = buides[np.random.randint(len(buides))] # nova posició aleatoria (el agent utilitza la porta mágica)
-    arr[tuple(nova_pos)] = arr[tuple(posicio)]
-    arr[tuple(posicio)] = -1
+    mapa[tuple(nova_pos)] = mapa[tuple(posicio)]
+    mapa[tuple(posicio)] = -1

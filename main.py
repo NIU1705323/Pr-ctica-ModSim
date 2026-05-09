@@ -2,8 +2,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from utils import *
 from config import *
+from random import seed
 
 if __name__ == "__main__":
+    
+    seed(SEED) # Assignem una inicialització concreta si està definida
+    
     # Tipus possibles:
     # 0 -> agent blau
     # 1 -> agent vermell
@@ -23,14 +27,10 @@ if __name__ == "__main__":
     print(arr)
 
     plt.figure(figsize=(6,6))
-    plt.imshow(arr, cmap="bwr", vmin=-1, vmax=1)
+    plt.imshow(arr, cmap="hsv", vmin=-1, vmax=TIPUS_DE_VEINS)
     plt.title("Estat inicial")
     plt.colorbar()
     plt.show(block=False)
-
-    
-    # PARÀMETRES DEL MODEL
-    tau = 0.7 # no posar proper a 1 q no acaba mai (no estan satisfets)
 
     
     # SIMULACIÓ
@@ -40,13 +40,13 @@ if __name__ == "__main__":
         np.random.shuffle(posicions) # Ordre aleatori
 
         for posicio in posicions:
-            if not satisfet(posicio, arr, tau):
+            if not satisfet(posicio, arr):
                 moure_agent(posicio, arr)
                 canvis += 1
 
         # Mostrar evolució
         plt.clf()
-        plt.imshow(np.where(arr == -1, np.nan, arr), cmap="bwr")
+        plt.imshow(np.where(arr == -1, np.nan, arr), cmap="hsv", vmin=-1, vmax=TIPUS_DE_VEINS)
         plt.title(f"Iteració {iteracio + 1}")
         plt.colorbar()
         plt.pause(0.3) # augmentar si va massa ràpid!!
@@ -65,7 +65,7 @@ if __name__ == "__main__":
     print(arr)
 
     plt.figure(figsize=(6,6))
-    plt.imshow(np.where(arr == -1, np.nan, arr), cmap="bwr")
+    plt.imshow(np.where(arr == -1, np.nan, arr), cmap="hsv", vmin=-1, vmax=TIPUS_DE_VEINS)
     plt.title("Estat final")
     plt.colorbar()
     plt.show()
