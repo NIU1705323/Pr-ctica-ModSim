@@ -31,6 +31,6 @@ def f_l_inf(punt : np.ndarray) -> float:
     return np.max(np.abs(punt))
 
 def generar_ponderació_identitat(punts : np.ndarray) -> np.ndarray:
-    return np.array([1]*punts.shape()[0])
+    return np.array([1]*punts.shape[0])
 
 print(generar_veins_l1(2, 2))
