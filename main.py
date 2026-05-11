@@ -18,8 +18,9 @@ if __name__ == "__main__":
     print("ESTAT INICIAL:\n")
     print(arr)
 
+    # Definim el plot de la matriu de veins
     fig, ax = plt.subplots(figsize=(6,6))
-    im = ax.imshow(np.where(arr == -1, np.nan, arr), cmap="hsv", vmin=-1, vmax=TIPUS_DE_VEINS)
+    im = ax.imshow(np.where(arr == -1, np.nan, arr), cmap=COLOR, vmin=-1, vmax=TIPUS_DE_VEINS)
     fig.colorbar(im)
     ax.set_xticklabels([])
     ax.set_yticklabels([])
@@ -37,10 +38,11 @@ if __name__ == "__main__":
             if satisfet(posicio, arr) < TAU:
                 if moure_agent(posicio, arr) == True: canvis += 1
 
-        # Mostrar evolució
-        im.set_data(np.where(arr == -1, np.nan, arr))
-        ax.set_title(f"Iteració {iteracio + 1}")
-        plt.pause(0.01) # augmentar si va massa ràpid!!
+        # Mostrar evolució cada X visualitzacions
+        if not iteracio%VISUALITZACIONS:
+            im.set_data(np.where(arr == -1, np.nan, arr))
+            ax.set_title(f"Iteració {iteracio + 1}")
+            plt.pause(TEMPS_ESPERA) # augmentar si va massa ràpid!!
 
         # Mostrem dades com poden ser el numero de moviments
         print(f"Iteració {iteracio + 1}: {canvis} moviments")

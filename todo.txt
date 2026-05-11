@@ -1,0 +1,9 @@
+Coses a implementar/millorar:
+
+1. Canviar els np.argwhere per algo més ràpid
+2. Implementar llista de caselles buides
+3. Fer una funció que crei INDEXOS_VEINS, pq fer-ho a ma es dolent
+4. Arreglar el bug on no es mostra els plots quan hauria
+5. Optimitzar en general
+
+Després ja es comença l'informe, si no hi ha més idees
