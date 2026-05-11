@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from utils import *
+from utils.utils import *
+from utils.moviment_agent import *
 from config import *
 from random import seed
 

@@ -22,14 +22,13 @@ SATISFET = 1.0 # valor al qual ja es considera satisfet
 
 # Variables dels veins
 TIPUS_DE_VEINS=2 # Nombre de colors diferents excloent Null
-PROBABILITATS_VEINS=[0.3, 0.3] # Vector de proporcions dels veins
+PROBABILITATS_VEINS=[0.01, 0.01] # Vector de proporcions dels veins
 
 
-# Taules d'adjacencia amb les seves ponderacions
-INDEXOS_VEINS = [ # veins del [0,0]
-    [-1,-1], [-1,0], [-1,1],
-    [0,-1],          [0,1],
-    [1,-1],  [1,0],  [1,1]
-]
-PONDERACIONS = [1]*8 # tots els veïns tenen la mateixa importància
-MOVIMENT = 0 # 0: Adjacent, 1: Aleatori, 2: Global, 3: Primera Millor
+DISTANCIA_MAXIMA_VEINS = 10
+
+METRICA = 2 # 0: l_inf, 1: l_1, 2: l_2 
+
+PONDERACIONS = 1 #0: Tots 1, 1: Inversament proporcional a la distancia
+
+MOVIMENT = 1 # 0: Adjacent, 1: Aleatori, 2: Global, 3: Primera Millor
