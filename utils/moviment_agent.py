@@ -1,3 +1,13 @@
+############################## ÚTILS ##############################
+##                                                               ##
+##             Document amb funcions per moure veins             ##
+##                                                               ##
+##  Les funcions tenen com a arguments els seguents paràmetres:  ##
+##   mapa: mapa del veinat, l'espai on conviuen els veins        ##
+##   posicio: el/s index del veí sobre el que actua la funció    ##
+##                                                               ##
+###################################################################
+
 import numpy as np
 from config import *
 from utils.utils import *

@@ -1,6 +1,11 @@
+############################ MÈTRIQUES ############################
+##                                                               ##
+##          Document amb funcions per generar caselles           ##
+##                                                               ##
+###################################################################
+
 import numpy as np
 from config import *
-
 
 ######## generació de veins ########
 
@@ -33,7 +38,6 @@ def generar_veins_ln() -> np.ndarray:
 INDEXOS_VEINS=generar_veins()
 
 
-
 ######## funcions de distància ########
 
 def f_l(punt : np.ndarray) -> float:
@@ -52,7 +56,6 @@ def f_ln(punt : np.ndarray) -> float:
 def f_l_inf(punt : np.ndarray) -> float:
     """La norma d'ordre infinit"""
     return np.max(np.abs(punt))
-
 
 
 ######## generació de ponderacions ########
