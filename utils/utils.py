@@ -9,15 +9,9 @@
 ###################################################################
 
 import numpy as np
+import matplotlib.pyplot as plt
 from config import *
 from utils.metriques import *
-
-INDEXOS_VEINS=(generar_veins_l_inf, generar_veins_l1, generar_veins_l2)[METRICA](len(DIMENSIONS), DISTANCIA_MAXIMA_VEINS)
-
-if not PONDERACIONS:
-    PONDERACIONS=generar_ponderació_identitat(INDEXOS_VEINS)
-else:
-    PONDERACIONS=generar_ponderació_inversa(INDEXOS_VEINS, (f_l_inf, f_l1, f_l2)[METRICA])
 
 def index_valid(posicio: np.ndarray, mapa: np.ndarray):
     """Funció que retorna les posicións vàlides"""
@@ -61,3 +55,22 @@ def satisfet(posicio: np.ndarray, mapa: np.ndarray, clase: np.ndarray = np.array
     proporcio = float(veins[tipus] / total)
     return proporcio
 
+
+def crear_dibuix(mapa: np.ndarray):
+    """Funció que crea el mapa del veinat per a poder veure-ho"""
+    
+    fig, ax = plt.subplots(figsize=(6,6))
+    im = ax.imshow(np.where(mapa == -1, np.nan, mapa), cmap=COLOR, vmin=-1, vmax=TIPUS_DE_VEINS)
+    fig.colorbar(im)
+    ax.set_xticklabels([])
+    ax.set_yticklabels([])
+    return {"fig": fig, "ax": ax, "im": im}
+
+
+def dibuixar(dibuix: dict, iter:int, mapa: np.ndarray) -> None:
+    """Funció que ens mostra el mapa del veinat en el seu estat actual (un plot)"""
+    
+    dibuix["im"].set_data(np.where(mapa == -1, np.nan, mapa))
+    dibuix["ax"].set_title(f"Iteració {iter}")
+    dibuix["fig"].canvas.draw()
+    plt.pause(TEMPS_ESPERA) # augmentar si va massa ràpid!!

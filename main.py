@@ -1,7 +1,6 @@
 import numpy as np
-import matplotlib.pyplot as plt
 from utils.utils import *
-from utils.moviment_agent import *
+from utils.moviment_agent import moure_agent
 from config import *
 from random import seed
 
@@ -20,12 +19,8 @@ if __name__ == "__main__":
     print(arr)
 
     # Definim el plot de la matriu de veins
-    fig, ax = plt.subplots(figsize=(6,6))
-    im = ax.imshow(np.where(arr == -1, np.nan, arr), cmap=COLOR, vmin=-1, vmax=TIPUS_DE_VEINS)
-    fig.colorbar(im)
-    ax.set_xticklabels([])
-    ax.set_yticklabels([])
-    plt.show(block=False)
+    imatge = crear_dibuix(arr)
+    dibuixar(imatge, iter=0, mapa=arr)
     
     # SIMULACIÓ
     canvis = -1 # Aquest valor està per a evitar errors
@@ -40,10 +35,7 @@ if __name__ == "__main__":
                 if moure_agent(posicio, arr) == True: canvis += 1
 
         # Mostrar evolució cada X visualitzacions
-        if not iteracio%VISUALITZACIONS:
-            im.set_data(np.where(arr == -1, np.nan, arr))
-            ax.set_title(f"Iteració {iteracio + 1}")
-            plt.pause(TEMPS_ESPERA) # augmentar si va massa ràpid!!
+        if not iteracio%VISUALITZACIONS: dibuixar(imatge, iteracio+1, arr)
 
         # Mostrem dades com poden ser el numero de moviments
         print(f"Iteració {iteracio + 1}: {canvis} moviments")
@@ -51,7 +43,7 @@ if __name__ == "__main__":
         # Equilibri
         if canvis == 0:
             print("\nEquilibri assolit")
-            ax.set_title(f"Equilibri assolit en l'iteració {iteracio + 1}")
+            imatge["ax"].set_title(f"Equilibri assolit en l'iteració {iteracio + 1}")
             break
 
     
@@ -59,5 +51,5 @@ if __name__ == "__main__":
     print("\nESTAT FINAL:\n")
     print(arr)
 
-    if canvis != 0: ax.set_title(f"Equilibri NO assolit en l'iteració {MAX_ITER}")
+    if canvis != 0: imatge["ax"].set_title(f"Equilibri NO assolit en l'iteració {MAX_ITER}")
     plt.show()
