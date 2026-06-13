@@ -19,12 +19,17 @@ if __name__ == "__main__":
     print(arr)
 
     # Definim el plot de la matriu de veins
-    imatge = crear_dibuix(arr)
-    dibuixar(imatge, iter=0, mapa=arr)
+    imatge = None
+    if len(DIMENSIONS) == 2:
+        imatge = crear_dibuix(arr)
+        dibuixar(imatge, iter=0, mapa=arr)
     
     # SIMULACIÓ
     canvis = -1 # Aquest valor està per a evitar errors
+    segregacio = []
     for iteracio in range(MAX_ITER):
+        valor = segregacio_local(arr)
+        segregacio.append(valor)
         canvis = 0
         posicions = np.argwhere(arr != -1) # Totes les posicions ocupades
         np.random.shuffle(posicions) # Ordre aleatori
@@ -35,21 +40,25 @@ if __name__ == "__main__":
                 if moure_agent(posicio, arr) == True: canvis += 1
 
         # Mostrar evolució cada X visualitzacions
-        if not iteracio%VISUALITZACIONS: dibuixar(imatge, iteracio+1, arr)
+        if not iteracio%VISUALITZACIONS and imatge is not None: dibuixar(imatge, iteracio+1, arr)
 
         # Mostrem dades com poden ser el numero de moviments
-        print(f"Iteració {iteracio + 1}: {canvis} moviments")
+        print(f"Iteració {iteracio + 1}: {canvis} moviments,{' '*(7-len(str(canvis)))}segregació: {segregacio[-1]}")
 
         # Equilibri
         if canvis == 0:
             print("\nEquilibri assolit")
-            imatge["ax"].set_title(f"Equilibri assolit en l'iteració {iteracio + 1}")
+            if imatge is not None: imatge["ax"].set_title(f"Equilibri assolit en l'iteració {iteracio + 1}")
             break
 
+    valor = segregacio_local(arr)
+    segregacio.append(valor)
     
     # ESTAT FINAL
     print("\nESTAT FINAL:\n")
     print(arr)
 
-    if canvis != 0: imatge["ax"].set_title(f"Equilibri NO assolit en l'iteració {MAX_ITER}")
+    if canvis != 0 and imatge is not None: imatge["ax"].set_title(f"Equilibri NO assolit en l'iteració {MAX_ITER}")
     plt.show()
+    
+    plot_segregacio(segregacio)
