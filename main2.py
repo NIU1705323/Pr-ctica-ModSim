@@ -10,24 +10,29 @@ def simular(tau: float, llavor: int) -> tuple:
     Executa una simulació completa amb un llindar de tolerància tau.
     Retorna (segregacio_final, iteracions_convergencia).
     """
-    rng = np.random.default_rng(llavor)
+    # Fixem la llavor global per a totes les operacions aleatòries d'aquest procés
+    np.random.seed(llavor)
 
     # Tipus i probabilitats
     tipus_disponibles = list(range(TIPUS_DE_VEINS)) + [-1]
     probabilitats = PROBABILITATS_VEINS + [1 - sum(PROBABILITATS_VEINS)]
 
-    # Graella inicial
-    arr = rng.choice(tipus_disponibles, size=DIMENSIONS, p=probabilitats)
+    # Graella inicial (com al main1 optimitzat)
+    arr = np.random.choice(tipus_disponibles, size=DIMENSIONS, p=probabilitats)
+
+    # Llista de caselles buides (es manté actualitzada durant la simulació)
+    buides = np.argwhere(arr == -1)
 
     # Simulació
     for iteracio in range(MAX_ITER):
         posicions = np.argwhere(arr != -1)
-        rng.shuffle(posicions)
+        np.random.shuffle(posicions)
 
         canvis = 0
         for posicio in posicions:
-            if satisfet(posicio, arr) < tau:
-                if moure_agent(posicio, arr):
+            satisfaccio = satisfet(posicio, arr)
+            if satisfaccio < tau:
+                if moure_agent(posicio, arr, buides, satisfaccio):
                     canvis += 1
 
         if canvis == 0:          # convergència
@@ -73,7 +78,6 @@ if __name__ == "__main__":
                 print(f"Error amb TAU={tau}, llavor={llavor}: {e}")
             finally:
                 completed += 1
-                # Mostrem progrés cada 10% o quan s'hagi completat tot
                 if completed % max(1, total_tasques // 10) == 0 or completed == total_tasques:
                     print(f"  Progrés: {completed}/{total_tasques} simulacions finalitzades", flush=True)
 
