@@ -7,16 +7,18 @@ from utils.utils import satisfet, segregacio_local
 from utils.moviment_agent import moure_agent
 import os
 from datetime import datetime
+from random import seed
 
-# ------------------------------------------------------------
-# Funció de simulació (la mateixa que a main2, però aquí importa config)
-# ------------------------------------------------------------
+# -------------------------------------------------------------
+# Funció de simulació amb importació del fitxer de configuració
+# -------------------------------------------------------------
 def simular(tau: float, llavor: int) -> tuple:
     """
     Executa una simulació completa amb un llindar de tolerància tau.
     Retorna (segregacio_final, iteracions_convergencia).
     """
     # Fixar la llavor global per a totes les operacions aleatòries d'aquest procés
+    seed(llavor)
     np.random.seed(llavor)
 
     # Tipus i probabilitats (ara venen de config)
@@ -26,31 +28,28 @@ def simular(tau: float, llavor: int) -> tuple:
     # Graella inicial
     arr = np.random.choice(tipus_disponibles, size=config.DIMENSIONS, p=probabilitats)
 
-    # Llista de caselles buides
-    buides = np.argwhere(arr == -1)
-
     # Simulació
+    canvis = -1   # Aquest valor està per a evitar errors
+    iteracio = -1 # Aquest valor està per a evitar errors
+    buides = np.argwhere(arr == -1) # Totes les posicions ocupades
     for iteracio in range(config.MAX_ITER):
         posicions = np.argwhere(arr != -1)
         np.random.shuffle(posicions)
-
         canvis = 0
         for posicio in posicions:
             satisfaccio = satisfet(posicio, arr)
             if satisfaccio < tau:
-                if moure_agent(posicio, arr, buides, satisfaccio):
-                    canvis += 1
+                if moure_agent(posicio, arr, buides, satisfaccio): canvis += 1
 
-        if canvis == 0:          # convergència
-            break
+        if canvis == 0: break # convergència
 
     segregacio = segregacio_local(arr)
     return segregacio, iteracio if canvis == 0 else config.MAX_ITER
 
 
-# ------------------------------------------------------------
+# ----------------------------------------------------------------
 # Funció que executa l'escombrat de TAU amb la configuració actual
-# ------------------------------------------------------------
+# ----------------------------------------------------------------
 def run_tau_sweep(n_simulacions=10, output_dir="results"):
     """
     Executa l'escombrat de TAU amb la configuració actual de 'config'.
@@ -85,8 +84,7 @@ def run_tau_sweep(n_simulacions=10, output_dir="results"):
     resultats_per_tau = {}
     completed = 0
     with ProcessPoolExecutor() as executor:
-        futurs = {executor.submit(simular, tau, llavor): (tau, llavor)
-                  for tau, llavor in tasques}
+        futurs = {executor.submit(simular, tau, llavor): (tau, llavor) for tau, llavor in tasques}
 
         for futur in as_completed(futurs):
             tau, llavor = futurs[futur]

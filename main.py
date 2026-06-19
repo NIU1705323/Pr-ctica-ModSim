@@ -8,6 +8,8 @@ from time import time
 if __name__ == "__main__":
     
     seed(SEED) # Assignem una inicialització concreta si està definida
+    np.random.seed(SEED)
+    
     temps = time()
     t=list(range(TIPUS_DE_VEINS))+[-1] # Valors de les diferents caselles
 

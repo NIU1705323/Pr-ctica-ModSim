@@ -35,7 +35,7 @@ def generar_veins_ln() -> np.ndarray:
     return punts[np.sum(np.abs(punts)**METRICA, axis=1)**(1/METRICA) <= DISTANCIA_MAXIMA_VEINS]
 
 
-INDEXOS_VEINS=generar_veins()
+INDEXOS_VEINS=generar_veins() # Generació dels indexos
 
 
 ######## funcions de distància ########
@@ -79,4 +79,4 @@ def generar_ponderació_identitat() -> np.ndarray:
     return np.array([1]*INDEXOS_VEINS.shape[0])
 
 
-PONDERACIONS = generar_ponderació()
+PONDERACIONS = generar_ponderació() # Generació de la ponderació

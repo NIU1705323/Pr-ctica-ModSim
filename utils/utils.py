@@ -22,12 +22,7 @@ def index_valid(posicio: np.ndarray, mapa: np.ndarray):
         np.all(posicio >= 0) and
         np.all(posicio < mapa.shape)
     )
-    
-    
-def wrap_posicio(posicio: np.ndarray, mapa: np.ndarray) -> np.ndarray:
-    """Aplica wrap-around (condicions periòdiques) a les coordenades"""
-    return np.array([posicio[i] % mapa.shape[i] for i in range(len(posicio))])
-    
+      
     
 def veins_propers(posicio: np.ndarray, mapa: np.ndarray) -> np.ndarray:
     """Funció que retorna l'importància ponderada de cada color de veí"""
@@ -35,7 +30,7 @@ def veins_propers(posicio: np.ndarray, mapa: np.ndarray) -> np.ndarray:
     resultat=[0]*TIPUS_DE_VEINS
     for i, pos in enumerate(INDEXOS_VEINS):
         vei = np.array(posicio) + np.array(pos)
-        if TORUS: vei = wrap_posicio(vei, mapa)
+        if TORUS: vei = np.array([posicio[i] % mapa.shape[i] for i in range(len(posicio))])
         if index_valid(vei, mapa):
             valor = mapa[tuple(vei)]
             if valor != -1:
@@ -44,7 +39,7 @@ def veins_propers(posicio: np.ndarray, mapa: np.ndarray) -> np.ndarray:
     return np.asarray(resultat)
 
 
-def satisfet(posicio: np.ndarray, mapa: np.ndarray, clase: np.ndarray = np.array(None)) -> float: # Com esta el Roger quan fa EDP's
+def satisfet(posicio: np.ndarray, mapa: np.ndarray, clase: np.ndarray = np.array(None)) -> float:
     """Funció que ens diu si un inividu està còmode en la seva posició actual"""
 
     # Si és una casella buida, està satisfeta
@@ -96,109 +91,18 @@ def plot_segregacio(valors) -> None:
     plt.tight_layout()
     plt.show()
     
+
+def segregacio_local(mapa: np.ndarray) -> float:
+    """Funció que mesura la proporció de veins del mateix tipus amb els altres"""
     
-from collections import deque
-def trobar_blocs(mapa, tipus):
-    """
-    Retorna llista de blocs (components connexos) d'un tipus.
-    Connexió 4-neighbours (es pot ampliar a 8 si vols).
-    """
+    valors = []
+    for pos in np.argwhere(mapa != -1):
+        tipus = mapa[tuple(pos)]
+        pesos = veins_propers(pos, mapa)
+        total = np.sum(pesos)
+        if total == 0: continue
+        p = pesos[tipus] / total
+        valors.append(p)
 
-    visitat = np.zeros_like(mapa, dtype=bool)
-    blocs = []
-
-    n, m = mapa.shape
-
-    for i in range(n):
-        for j in range(m):
-
-            if visitat[i, j]:
-                continue
-
-            if mapa[i, j] != tipus:
-                continue
-
-            # BFS per component
-            cua = deque([(i, j)])
-            visitat[i, j] = True
-            bloc = []
-
-            while cua:
-                x, y = cua.popleft()
-                bloc.append((x, y))
-
-                for dx, dy in [(-1,0),(1,0),(0,-1),(0,1)]:
-                    nx, ny = x + dx, y + dy
-
-                    if 0 <= nx < n and 0 <= ny < m:
-                        if not visitat[nx, ny] and mapa[nx, ny] == tipus:
-                            visitat[nx, ny] = True
-                            cua.append((nx, ny))
-
-            blocs.append(bloc)
-
-    return blocs
-
-
-def segregacio_local(mapa): # Densitat clusters
-    """
-    Mesura com de compactes són els grups.
-    0 = dispers
-    1 = un sol bloc compacte
-    """
-
-    tipus_unics = [t for t in np.unique(mapa) if t != -1]
-
-    densitats = []
-
-    for t in tipus_unics:
-        blocs = trobar_blocs(mapa, t)
-
-        if len(blocs) == 0:
-            continue
-
-        mides = np.array([len(b) for b in blocs])
-
-        # bloc dominant vs dispersió
-        max_bloc = np.max(mides)
-        total = np.sum(mides)
-
-        # proporció del bloc més gran
-        densitat = max_bloc / total
-
-        densitats.append(densitat)
-
-    if len(densitats) == 0:
-        return 0.0
-
-    return float(np.mean(densitats))
-
-
-def segregacio_local_1(mapa): # Entropia blocs
-    """
-    0 = un sol bloc per tipus (molt segregat)
-    alta = molts blocs petits (dispers)
-    """
-
-    from math import log
-
-    tipus_unics = [t for t in np.unique(mapa) if t != -1]
-
-    entropies = []
-
-    for t in tipus_unics:
-        blocs = trobar_blocs(mapa, t)
-
-        if len(blocs) <= 1:
-            continue
-
-        mides = np.array([len(b) for b in blocs])
-        probs = mides / mides.sum()
-
-        ent = -np.sum(probs * np.log(probs + 1e-12))
-        entropies.append(ent)
-
-    if len(entropies) == 0:
-        return 0.0
-
-    return float(np.mean(entropies))
+    if len(valors) == 0: return 0.0
+    return float(np.mean(valors))
